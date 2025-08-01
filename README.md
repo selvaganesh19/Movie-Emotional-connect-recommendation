@@ -1,5 +1,3 @@
-# Movie-Emotional-connect-recommendation
-
 # 🎬 Movie-Emotional-connect-recommendation
 
 Welcome to **Movie-Emotional-connect-recommendation**! This project leverages modern web technologies and machine learning to recommend movies based on your emotional state, helping you find the perfect film for every mood.
