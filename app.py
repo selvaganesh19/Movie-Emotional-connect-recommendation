@@ -303,8 +303,8 @@ def get_streaming_platforms(title):
         print(f"❌ Watchmode error for '{title}': {e}")
         return ["Netflix", "Amazon Prime"]
 
-# For Render deployment
-if __name__ == "__main__":
-    import uvicorn
-    port = int(os.environ.get("PORT", 8000))
-    uvicorn.run("app:app", host="0.0.0.0", port=port)
+# # For Render deployment
+# if __name__ == "__main__":
+#     import uvicorn
+#     port = int(os.environ.get("PORT", 8000))
+#     uvicorn.run("app:app", host="0.0.0.0", port=port)
