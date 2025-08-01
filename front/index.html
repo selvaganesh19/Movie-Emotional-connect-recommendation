@@ -3,7 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Discover perfect movies based on your current mood">
+    <meta name="theme-color" content="#764ba2">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="MovieMood">
+    <meta name="msapplication-TileColor" content="#667eea">
+    <meta name="msapplication-TileImage" content="/android-icon-144x144.png">
+    <meta name="msapplication-tap-highlight" content="no">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+    
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    
+    <!-- Android Icons -->
+    <link rel="icon" type="image/png" sizes="192x192" href="/android-icon-192x192.png">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    
     <title>🎬 Movie Mood Recommender</title>
+    
     <style>
         * {
             margin: 0;
@@ -37,6 +71,56 @@
             color: rgba(255,255,255,0.9);
             margin-bottom: 40px;
             font-size: 1.2em;
+        }
+
+        /* PWA Install Button */
+        .install-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 50px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            display: none;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .install-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+        }
+
+        .offline-indicator {
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #e74c3c;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            display: none;
+            z-index: 1000;
+            animation: slideDown 0.3s ease;
+        }
+
+        .offline-indicator.online {
+            background: #27ae60;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translate(-50%, -100%);
+            }
+            to {
+                transform: translate(-50%, 0);
+            }
         }
 
         .mood-selector {
@@ -271,10 +355,27 @@
             .movie-grid {
                 grid-template-columns: 1fr;
             }
+
+            .install-btn {
+                bottom: 10px;
+                right: 10px;
+                padding: 12px 16px;
+                font-size: 0.9em;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Offline Indicator -->
+    <div id="offline-indicator" class="offline-indicator">
+        You're offline. Some features may be limited.
+    </div>
+
+    <!-- PWA Install Button -->
+    <button id="install-btn" class="install-btn">
+        📱 Install App
+    </button>
+
     <div class="container">
         <h1>🎬 Movie Mood Recommender</h1>
         <p class="subtitle">Discover perfect movies based on your current mood</p>
@@ -312,6 +413,60 @@
         
         let selectedMood = '';
         let selectedLanguage = 'all';
+        let deferredPrompt;
+
+        // PWA Installation
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('install-btn').style.display = 'block';
+        });
+
+        document.getElementById('install-btn').addEventListener('click', () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('User accepted the install prompt');
+                        document.getElementById('install-btn').style.display = 'none';
+                    }
+                    deferredPrompt = null;
+                });
+            }
+        });
+
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((registration) => {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch((registrationError) => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+
+        // Online/Offline Detection
+        const offlineIndicator = document.getElementById('offline-indicator');
+
+        function updateOnlineStatus() {
+            if (navigator.onLine) {
+                offlineIndicator.textContent = 'Back online!';
+                offlineIndicator.classList.add('online');
+                setTimeout(() => {
+                    offlineIndicator.style.display = 'none';
+                }, 3000);
+            } else {
+                offlineIndicator.textContent = 'You\'re offline. Some features may be limited.';
+                offlineIndicator.classList.remove('online');
+                offlineIndicator.style.display = 'block';
+            }
+        }
+
+        window.addEventListener('online', updateOnlineStatus);
+        window.addEventListener('offline', updateOnlineStatus);
 
         function selectMood(mood) {
             selectedMood = mood;
@@ -361,12 +516,29 @@
 
                 if (data.success && data.recommendations.length > 0) {
                     displayRecommendations(data.recommendations);
+                    
+                    // Show notification if supported
+                    if ('serviceWorker' in navigator && 'Notification' in window) {
+                        if (Notification.permission === 'granted') {
+                            navigator.serviceWorker.ready.then(registration => {
+                                registration.showNotification('New Recommendations!', {
+                                    body: `Found ${data.recommendations.length} movies for your ${selectedMood} mood`,
+                                    icon: '/android-icon-192x192.png',
+                                    badge: '/android-icon-72x72.png'
+                                });
+                            });
+                        }
+                    }
                 } else {
                     showError('No movies found. Please try a different mood or language.');
                 }
             } catch (error) {
                 console.error('Error:', error);
-                showError('Unable to get recommendations. Please check your internet connection and try again.');
+                if (!navigator.onLine) {
+                    showError('You\'re offline. Please check your internet connection and try again.');
+                } else {
+                    showError('Unable to get recommendations. Please try again.');
+                }
             }
         }
 
@@ -411,6 +583,11 @@
                     <p>${message}</p>
                 </div>
             `;
+        }
+
+        // Request notification permission
+        if ('Notification' in window) {
+            Notification.requestPermission();
         }
     </script>
 </body>
