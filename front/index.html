@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <!-- PWA Meta Tags - FIXED -->
+    <!-- PWA Meta Tags -->
     <meta name="description" content="Discover perfect movies based on your current mood">
     <meta name="theme-color" content="#764ba2">
     <meta name="mobile-web-app-capable" content="yes">
@@ -12,11 +12,27 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="MovieMood">
     <meta name="msapplication-TileColor" content="#667eea">
+    <meta name="msapplication-TileImage" content="./android-icon-144x144.png">
     <meta name="msapplication-tap-highlight" content="no">
     
-    <!-- Simple emoji favicon -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text y='32' font-size='32'>🎬</text></svg>">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text y='64' font-size='64'>🎬</text></svg>">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="./favicon-96x96.png">
+    
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" sizes="57x57" href="./apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="./apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="./apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="./apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="./apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="./apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="./apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="./apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="./apple-icon-180x180.png">
+    
+    <!-- Android Icons -->
+    <link rel="icon" type="image/png" sizes="192x192" href="./android-icon-192x192.png">
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="./manifest.json">
@@ -420,7 +436,7 @@
             }
         });
 
-        // Service Worker Registration - FIXED
+        // Service Worker Registration
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
@@ -502,14 +518,14 @@
                 if (data.success && data.recommendations.length > 0) {
                     displayRecommendations(data.recommendations);
                     
-                    // Show notification if supported
+                    // Show notification if supported - Updated with proper icon paths
                     if ('serviceWorker' in navigator && 'Notification' in window) {
                         if (Notification.permission === 'granted') {
                             navigator.serviceWorker.ready.then(registration => {
                                 registration.showNotification('New Recommendations!', {
                                     body: `Found ${data.recommendations.length} movies for your ${selectedMood} mood`,
-                                    icon: '/android-icon-192x192.png',
-                                    badge: '/android-icon-72x72.png'
+                                    icon: './android-icon-192x192.png',
+                                    badge: './android-icon-72x72.png'
                                 });
                             });
                         }
